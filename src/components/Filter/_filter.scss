@@ -1,0 +1,38 @@
+.filter {
+  margin-bottom: 20px;
+
+  &--large-mb {
+    margin-bottom: 45px;
+  }
+}
+
+.filter__title {
+  display: block;
+  margin-bottom: 15px;
+  font-weight: 700;
+  color: $secondary-dark;
+}
+
+.filter__option {
+  display: flex;
+
+  &--large-mb {
+    margin-bottom: 20px;
+  }
+}
+
+.filter__label {
+  &--mr {
+    margin-right: 5px;
+  }
+
+  &--airline {
+    flex: 1 0;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.filter__input {
+  margin-right: 5px;
+}
