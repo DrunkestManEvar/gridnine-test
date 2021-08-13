@@ -1,0 +1,135 @@
+.flight__price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.flight__price {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.flight__locations {
+  padding: 15px 8px 0;
+
+  p {
+    padding: 0px 12px 15px;
+    border-bottom: solid 1px $main-light;
+  }
+  p > * {
+    display: inline-block;
+    margin-right: 5px;
+  }
+}
+
+.flight__segment:nth-child(3) .flight__locations {
+  border-top: solid 2px $main-blue;
+}
+
+.flight__airport-code,
+.flight__date {
+  color: $main-blue;
+}
+
+.flight__arrow {
+  position: relative;
+  width: 15px;
+  margin-right: 8px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+  }
+
+  &::before {
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: $main-blue;
+  }
+
+  &::after {
+    right: -3px;
+    width: 5px;
+    height: 5px;
+    border-bottom: solid 1px $main-blue;
+    border-right: solid 1px $main-blue;
+    transform: rotate(-45deg) translateY(-50%);
+  }
+}
+
+.flight__time-info {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 20px;
+}
+
+.flight__time,
+.flight__duration {
+  font-size: 18px;
+}
+
+.flight__time-container {
+  & > *:first-child {
+    margin-right: 5px;
+  }
+}
+
+.flight__clock {
+  position: relative;
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: solid 1px $main-dark;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+
+    background-color: $main-dark;
+  }
+
+  &::before {
+    top: 0;
+    bottom: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+  }
+
+  &::after {
+    top: 50%;
+    right: 90%;
+    transform: rotate(45deg);
+    height: 1px;
+    width: 30%;
+  }
+}
+
+.flight__line {
+  position: absolute;
+  left: 55px;
+  bottom: 0;
+  right: 55px;
+  height: 1px;
+  background-color: $secondary-gray;
+
+  .flight__connections-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 0 10px;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    color: $main-orange;
+  }
+}
+
+.flight__carrier {
+  padding: 15px 20px;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Wrapper from '../Wrapper/Wrapper';
 import Filters from '../Filters/Filters';
 import Flights from '../Flights/Flights';
+import { extractFlightsInfo } from '../../utility';
 
 const Main = () => {
   const [flights, setFlights] = useState([]);
@@ -47,11 +48,12 @@ const Main = () => {
       .then(res => res.json())
       .then(res => {
         const fetchedFlights = res.result.flights;
+        const flights = extractFlightsInfo(fetchedFlights);
+        console.log(flights[0]);
+        const airlines = fetchedFlights.reduce(saveUniqueAirlines, []);
 
-        const fetchedAirlines = fetchedFlights.reduce(saveUniqueAirlines, []);
-
-        setAirlines(fetchedAirlines);
-        setFlights(fetchedFlights);
+        setAirlines(airlines);
+        setFlights(flights);
       });
   }, [saveUniqueAirlines]);
 
