@@ -7,8 +7,7 @@ import {
 } from '../../utility';
 
 const Flight = ({ flight }) => {
-  const { price, firstSegment, secondSegment, airlineCode } = flight;
-  const segments = [firstSegment, secondSegment];
+  const { price, segments, airlineCode } = flight;
 
   return (
     <article className='flight'>

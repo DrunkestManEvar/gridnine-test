@@ -8,7 +8,7 @@ const Main = () => {
   const [flights, setFlights] = useState([]);
   const [airlines, setAirlines] = useState([]);
 
-  const checkIfDuplicatedPriceShouldChange = (
+  const checkIfDuplicatePriceShouldChange = (
     duplicatedPrice,
     currFlightPrice
   ) => {
@@ -18,8 +18,8 @@ const Main = () => {
   };
 
   const saveUniqueAirlines = useCallback((arrayOfFlights, currentFlight) => {
-    const currAirlineName = currentFlight.flight.carrier.caption;
-    const currFlightPrice = currentFlight.flight.price.total.amount;
+    const currAirlineName = currentFlight.airlineName;
+    const currFlightPrice = currentFlight.price;
 
     if (!arrayOfFlights.some(obj => obj.airline === currAirlineName)) {
       arrayOfFlights.push({ airline: currAirlineName, price: currFlightPrice });
@@ -27,10 +27,10 @@ const Main = () => {
       const duplicatedAirline = arrayOfFlights.find(
         flight => flight.airline === currAirlineName
       );
-      const duplicatedPrice = duplicatedAirline.price;
+      const duplicatePrice = duplicatedAirline.price;
 
-      duplicatedAirline.price = checkIfDuplicatedPriceShouldChange(
-        duplicatedPrice,
+      duplicatedAirline.price = checkIfDuplicatePriceShouldChange(
+        duplicatePrice,
         currFlightPrice
       );
     }
@@ -49,8 +49,7 @@ const Main = () => {
       .then(res => {
         const fetchedFlights = res.result.flights;
         const flights = extractFlightsInfo(fetchedFlights);
-        console.log(flights[0]);
-        const airlines = fetchedFlights.reduce(saveUniqueAirlines, []);
+        const airlines = flights.reduce(saveUniqueAirlines, []);
 
         setAirlines(airlines);
         setFlights(flights);
