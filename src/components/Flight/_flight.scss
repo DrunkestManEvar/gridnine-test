@@ -1,3 +1,7 @@
+.flight {
+  margin-bottom: 25px;
+}
+
 .flight__top-bar {
   display: flex;
   justify-content: space-between;
@@ -32,7 +36,12 @@
   }
 }
 
-.flight__airport-code {
+.flight__segment:nth-child(3) .flight__locations {
+  border-top: solid 2px $main-blue;
+}
+
+.flight__airport-code,
+.flight__date {
   color: $main-blue;
 }
 
@@ -70,6 +79,11 @@
   display: flex;
   justify-content: space-between;
   padding: 15px 20px;
+}
+
+.flight__time,
+.flight__duration {
+  font-size: 18px;
 }
 
 .flight__time-container {

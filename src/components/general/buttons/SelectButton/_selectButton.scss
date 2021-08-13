@@ -6,4 +6,10 @@
   background-color: $main-orange;
   color: #fff;
   border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease-out;
+
+  &:hover {
+    background-color: #f7a456;
+  }
 }
