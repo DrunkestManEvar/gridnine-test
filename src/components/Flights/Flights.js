@@ -1,7 +1,7 @@
 import Flight from '../Flight/Flight';
 import ShowMoreButton from '../general/buttons/ShowMoreButton/ShowMoreButton';
 
-const Flights = ({ flights }) => {
+const Flights = ({ flights, showMoreFlights }) => {
   if (!flights) return null;
 
   return (
@@ -10,7 +10,7 @@ const Flights = ({ flights }) => {
         <Flight key={`flight-${index}`} flight={flight} />
       ))}
       <div className='flights__show-more'>
-        <ShowMoreButton />
+        <ShowMoreButton handleClick={showMoreFlights} />
       </div>
     </section>
   );

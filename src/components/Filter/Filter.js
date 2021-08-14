@@ -1,35 +1,40 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-const Filter = ({ type, title, options, hasLargeMarginBottom }) => {
-  const [priceTypingTimeout, setPriceTypingTimeout] = useState(0);
+const Filter = ({
+  type,
+  title,
+  options,
+  hasLargeMarginBottom,
+  filterHighestPrice,
+  filterLowestPrice
+}) => {
+  const [lowestPrice, setLowestPrice] = useState('');
+  const [highestPrice, setHighestPrice] = useState('');
   const lowestPriceInputValue = useRef(null);
   const highestPriceInputValue = useRef(null);
 
-  const handlePriceInputChange = (value, type, filterCallback) => {
-    const enteredPriceValue = Number(value);
-
-    if (priceTypingTimeout) clearTimeout(priceTypingTimeout);
-    setPriceTypingTimeout(
-      setTimeout(() => {
-        const oldPrice =
-          type === 'lowest'
-            ? lowestPriceInputValue.current.value
-            : highestPriceInputValue.current.value;
-
-        if (oldPrice === enteredPriceValue) filterCallback(enteredPriceValue);
-      }, 1500)
-    );
-
-    // setTimeout(() => {
-    //   console.log('timeout');
-    //   const oldPrice =
-    //     type === 'lowest'
-    //       ? lowestPriceInputValue.current.value
-    //       : highestPriceInputValue.current.value;
-
-    //   if (oldPrice === enteredPriceValue) filterCallback(enteredPriceValue);
-    // }, 1500);
+  const handlePriceInputChange = (value, typeOfPrice) => {
+    if (typeOfPrice === 'lowest') setLowestPrice(value);
+    else setHighestPrice(value);
   };
+
+  useEffect(() => {
+    const filterByPriceTimeout = setTimeout(() => {
+      if (lowestPrice && lowestPrice === lowestPriceInputValue.current.value)
+        filterLowestPrice(lowestPrice);
+    }, 1500);
+
+    return () => clearTimeout(filterByPriceTimeout);
+  }, [lowestPrice, filterLowestPrice]);
+
+  useEffect(() => {
+    const filterByPriceTimeout = setTimeout(() => {
+      if (highestPrice && highestPrice === highestPriceInputValue.current.value)
+        filterHighestPrice(highestPrice);
+    }, 1500);
+
+    return () => clearTimeout(filterByPriceTimeout);
+  }, [highestPrice, filterHighestPrice]);
 
   const filterInputs = {
     sortBy: () => {
@@ -75,15 +80,15 @@ const Filter = ({ type, title, options, hasLargeMarginBottom }) => {
             <input
               type='text'
               placeholder={index === 0 ? '0' : '10000'}
-              ref={index === 0 ? lowestPriceInputValue : highestPriceInputValue}
+              ref={
+                option.type === 'lowest'
+                  ? lowestPriceInputValue
+                  : highestPriceInputValue
+              }
               className='filter__input'
-              value={option.value}
+              value={option.type === 'lowest' ? lowestPrice : highestPrice}
               onChange={e =>
-                handlePriceInputChange(
-                  e.target.value,
-                  index === 0 ? 'lowest' : 'highest',
-                  option.filter(e.target.value)
-                )
+                handlePriceInputChange(e.target.value, option.type)
               }
             />
           </div>

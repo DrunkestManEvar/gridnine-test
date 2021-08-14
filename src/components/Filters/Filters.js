@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Filter from '../Filter/Filter';
 
 const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
@@ -119,47 +119,53 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
     handleFilterFlights(filteredFlights);
   };
 
-  const filterLowestPrice = enteredValue => {
-    const newLowestPrice = Number(enteredValue);
-    setPriceFilter(prevState => ({ ...prevState, lowest: newLowestPrice }));
-    const filteredFlights = flights.slice().filter(flight => {
-      let shouldFlightBeIncluded = false;
+  const filterLowestPrice = useCallback(
+    enteredValue => {
+      const newLowestPrice = Number(enteredValue);
+      setPriceFilter(prevState => ({ ...prevState, lowest: newLowestPrice }));
+      const filteredFlights = flights.slice().filter(flight => {
+        let shouldFlightBeIncluded = false;
 
-      if (!priceFilter.highest) {
-        shouldFlightBeIncluded = flight.price > newLowestPrice;
-      }
+        if (!priceFilter.highest) {
+          shouldFlightBeIncluded = flight.price > newLowestPrice;
+        }
 
-      if (priceFilter.highest) {
-        shouldFlightBeIncluded =
-          flight.price > newLowestPrice && flight.price < priceFilter.highest;
-      }
+        if (priceFilter.highest) {
+          shouldFlightBeIncluded =
+            flight.price > newLowestPrice && flight.price < priceFilter.highest;
+        }
 
-      return shouldFlightBeIncluded;
-    });
+        return shouldFlightBeIncluded;
+      });
 
-    handleFilterFlights(filteredFlights);
-  };
+      handleFilterFlights(filteredFlights);
+    },
+    [flights, handleFilterFlights, priceFilter.highest]
+  );
 
-  const filterHighestPrice = enteredValue => {
-    const newHighestPrice = Number(enteredValue);
-    setPriceFilter(prevState => ({ ...prevState, highest: newHighestPrice }));
-    const filteredFlights = flights.slice().filter(flight => {
-      let shouldFlightBeIncluded = false;
+  const filterHighestPrice = useCallback(
+    enteredValue => {
+      const newHighestPrice = Number(enteredValue);
+      setPriceFilter(prevState => ({ ...prevState, highest: newHighestPrice }));
+      const filteredFlights = flights.slice().filter(flight => {
+        let shouldFlightBeIncluded = false;
 
-      if (!priceFilter.lowest) {
-        shouldFlightBeIncluded = flight.price < newHighestPrice;
-      }
+        if (!priceFilter.lowest) {
+          shouldFlightBeIncluded = flight.price < newHighestPrice;
+        }
 
-      if (priceFilter.lowest) {
-        shouldFlightBeIncluded =
-          flight.price < newHighestPrice && flight.price > priceFilter.lowest;
-      }
+        if (priceFilter.lowest) {
+          shouldFlightBeIncluded =
+            flight.price < newHighestPrice && flight.price > priceFilter.lowest;
+        }
 
-      return shouldFlightBeIncluded;
-    });
+        return shouldFlightBeIncluded;
+      });
 
-    handleFilterFlights(filteredFlights);
-  };
+      handleFilterFlights(filteredFlights);
+    },
+    [flights, handleFilterFlights, priceFilter.lowest]
+  );
 
   const filters = [
     {
@@ -208,8 +214,18 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
       type: 'price',
       title: 'Цена',
       options: [
-        { title: 'От', value: priceFilter.lowest, filter: filterLowestPrice },
-        { title: 'До', value: priceFilter.highest, filter: filterHighestPrice }
+        {
+          title: 'От',
+          type: 'lowest',
+          value: priceFilter.lowest,
+          filter: filterLowestPrice
+        },
+        {
+          title: 'До',
+          type: 'highest',
+          value: priceFilter.highest,
+          filter: filterHighestPrice
+        }
       ]
     },
     {
@@ -236,6 +252,8 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
           title={filter.title}
           options={filter.options}
           hasLargeMarginBottom={index === 0}
+          filterHighestPrice={filterHighestPrice}
+          filterLowestPrice={filterLowestPrice}
         />
       ))}
     </form>

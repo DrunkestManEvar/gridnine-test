@@ -7,10 +7,14 @@ import { extractFlightsInfo } from '../../utility';
 const Main = () => {
   const [flights, setFlights] = useState([]);
   const [shownFlights, setShownFlights] = useState([]);
-  // const [shownFlightsNumber, setShownFlightsNumber] = useState(2);
   const [airlines, setAirlines] = useState([]);
+  const [shownFlightsNumber, setShownFlightsNumber] = useState(10);
+  const showMoreFlightsStep = 10;
 
-  console.log(shownFlights.length);
+  const showMoreFlights = () => {
+    console.log('show more');
+    setShownFlightsNumber(prevState => prevState + showMoreFlightsStep);
+  };
 
   const checkIfDuplicatePriceShouldChange = (
     duplicatedPrice,
@@ -67,6 +71,10 @@ const Main = () => {
     getFlightsData();
   }, [getFlightsData]);
 
+  useEffect(() => {
+    setShownFlights(flights.slice(0, shownFlightsNumber + 1));
+  }, [flights, shownFlightsNumber]);
+
   return (
     <Wrapper>
       <main className='main'>
@@ -76,7 +84,7 @@ const Main = () => {
           airlines={airlines}
           handleFilterFlights={setShownFlights}
         />
-        <Flights flights={shownFlights} />
+        <Flights flights={shownFlights} showMoreFlights={showMoreFlights} />
       </main>
     </Wrapper>
   );
