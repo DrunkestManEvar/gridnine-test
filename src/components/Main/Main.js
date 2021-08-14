@@ -6,7 +6,11 @@ import { extractFlightsInfo } from '../../utility';
 
 const Main = () => {
   const [flights, setFlights] = useState([]);
+  const [shownFlights, setShownFlights] = useState([]);
+  // const [shownFlightsNumber, setShownFlightsNumber] = useState(2);
   const [airlines, setAirlines] = useState([]);
+
+  console.log(shownFlights.length);
 
   const checkIfDuplicatePriceShouldChange = (
     duplicatedPrice,
@@ -48,11 +52,14 @@ const Main = () => {
       .then(res => res.json())
       .then(res => {
         const fetchedFlights = res.result.flights;
-        const flights = extractFlightsInfo(fetchedFlights);
+        const flights = extractFlightsInfo(fetchedFlights).sort(
+          (a, b) => a.price - b.price
+        );
         const airlines = flights.reduce(saveUniqueAirlines, []);
 
         setAirlines(airlines);
         setFlights(flights);
+        setShownFlights(flights);
       });
   }, [saveUniqueAirlines]);
 
@@ -63,8 +70,13 @@ const Main = () => {
   return (
     <Wrapper>
       <main className='main'>
-        <Filters airlines={airlines} />
-        <Flights flights={flights} />
+        <Filters
+          flights={flights}
+          shownFlights={shownFlights}
+          airlines={airlines}
+          handleFilterFlights={setShownFlights}
+        />
+        <Flights flights={shownFlights} />
       </main>
     </Wrapper>
   );

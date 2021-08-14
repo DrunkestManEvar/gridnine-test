@@ -1,13 +1,16 @@
 const extractFlightsInfo = flightsArray => {
   return flightsArray.map((flight, i) => {
     const { airlineCode, caption: airlineName } = flight.flight.carrier;
-    const { amount: price } = flight.flight.price.total;
+    let { amount: price } = flight.flight.price.total;
+    price = Number(price);
     const { legs } = flight.flight;
     let flightSegments = [];
+    let duration = 0;
 
     for (const leg of legs) {
-      const { segments } = leg;
+      const { segments, duration: segmentDuration } = leg;
       flightSegments.push(segments);
+      duration += segmentDuration;
     }
 
     let numOfSegments = 0;
@@ -23,6 +26,7 @@ const extractFlightsInfo = flightsArray => {
       airlineCode,
       airlineName,
       price,
+      duration,
       segments: flightSegments,
       isDirect
     };
