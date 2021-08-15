@@ -1,6 +1,10 @@
-const ShowMoreButton = ({ handleClick }) => {
+const ShowMoreButton = ({ handleClick, isDisabled }) => {
   return (
-    <button className='show-more-button' onClick={handleClick}>
+    <button
+      className={`show-more-button ${
+        isDisabled ? 'show-more-button--disabled' : ''
+      }`}
+      onClick={handleClick}>
       Показать еще
     </button>
   );

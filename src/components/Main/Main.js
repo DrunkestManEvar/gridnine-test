@@ -6,15 +6,8 @@ import { extractFlightsInfo } from '../../utility';
 
 const Main = () => {
   const [flights, setFlights] = useState([]);
-  const [shownFlights, setShownFlights] = useState([]);
+  const [filteredFlights, setFilteredFlights] = useState([]);
   const [airlines, setAirlines] = useState([]);
-  const [shownFlightsNumber, setShownFlightsNumber] = useState(10);
-  const showMoreFlightsStep = 10;
-
-  const showMoreFlights = () => {
-    console.log('show more');
-    setShownFlightsNumber(prevState => prevState + showMoreFlightsStep);
-  };
 
   const checkIfDuplicatePriceShouldChange = (
     duplicatedPrice,
@@ -63,7 +56,7 @@ const Main = () => {
 
         setAirlines(airlines);
         setFlights(flights);
-        setShownFlights(flights);
+        setFilteredFlights(flights);
       });
   }, [saveUniqueAirlines]);
 
@@ -71,20 +64,16 @@ const Main = () => {
     getFlightsData();
   }, [getFlightsData]);
 
-  useEffect(() => {
-    setShownFlights(flights.slice(0, shownFlightsNumber + 1));
-  }, [flights, shownFlightsNumber]);
-
   return (
     <Wrapper>
       <main className='main'>
         <Filters
           flights={flights}
-          shownFlights={shownFlights}
+          filteredFlights={filteredFlights}
           airlines={airlines}
-          handleFilterFlights={setShownFlights}
+          handleFilterFlights={setFilteredFlights}
         />
-        <Flights flights={shownFlights} showMoreFlights={showMoreFlights} />
+        <Flights flights={filteredFlights} />
       </main>
     </Wrapper>
   );

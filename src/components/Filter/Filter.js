@@ -4,37 +4,54 @@ const Filter = ({
   type,
   title,
   options,
+  filteredFlights,
+  isDirectFilterApplied,
   hasLargeMarginBottom,
   filterHighestPrice,
   filterLowestPrice
 }) => {
   const [lowestPrice, setLowestPrice] = useState('');
+  const [lowestPriceInputHasBeenTouched, setLowestPriceInputHasBeenTouched] =
+    useState(false);
+  const [highestPriceInputHasBeenTouched, setHighestPriceInputHasBeenTouched] =
+    useState(false);
   const [highestPrice, setHighestPrice] = useState('');
   const lowestPriceInputValue = useRef(null);
   const highestPriceInputValue = useRef(null);
 
   const handlePriceInputChange = (value, typeOfPrice) => {
-    if (typeOfPrice === 'lowest') setLowestPrice(value);
-    else setHighestPrice(value);
+    if (typeOfPrice === 'lowest') {
+      setLowestPrice(value);
+      setLowestPriceInputHasBeenTouched(true);
+    } else {
+      setHighestPrice(value);
+      setHighestPriceInputHasBeenTouched(true);
+    }
   };
 
   useEffect(() => {
     const filterByPriceTimeout = setTimeout(() => {
-      if (lowestPrice && lowestPrice === lowestPriceInputValue.current.value)
+      if (
+        (lowestPrice !== '' || lowestPriceInputHasBeenTouched) &&
+        lowestPrice === lowestPriceInputValue.current.value
+      )
         filterLowestPrice(lowestPrice);
     }, 1500);
 
     return () => clearTimeout(filterByPriceTimeout);
-  }, [lowestPrice, filterLowestPrice]);
+  }, [lowestPrice, filterLowestPrice, lowestPriceInputHasBeenTouched]);
 
   useEffect(() => {
     const filterByPriceTimeout = setTimeout(() => {
-      if (highestPrice && highestPrice === highestPriceInputValue.current.value)
+      if (
+        (highestPrice !== '' || highestPriceInputHasBeenTouched) &&
+        highestPrice === highestPriceInputValue.current.value
+      )
         filterHighestPrice(highestPrice);
     }, 1500);
 
     return () => clearTimeout(filterByPriceTimeout);
-  }, [highestPrice, filterHighestPrice]);
+  }, [highestPrice, filterHighestPrice, highestPriceInputHasBeenTouched]);
 
   const filterInputs = {
     sortBy: () => {
@@ -78,7 +95,7 @@ const Filter = ({
               {option.title}
             </label>
             <input
-              type='text'
+              type='number'
               placeholder={index === 0 ? '0' : '10000'}
               ref={
                 option.type === 'lowest'
@@ -102,8 +119,20 @@ const Filter = ({
             ? option.airline.slice(0, 14) + '...'
             : option.airline;
 
+        const canApplyFilter = filteredFlights.filter(flight => {
+          if (!isDirectFilterApplied) return true;
+
+          if (isDirectFilterApplied && flight.airlineName === option.airline)
+            return true;
+          else return false;
+        }).length;
+
         return (
-          <div key={`${option}-${index}`} className='filter__option'>
+          <div
+            key={`${option}-${index}`}
+            className={`filter__option ${
+              canApplyFilter ? '' : 'filter__option--disabled'
+            }`}>
             <input
               type='checkbox'
               name={type}
@@ -111,6 +140,7 @@ const Filter = ({
               className='filter__input'
               checked={option.isChecked}
               onChange={() => option.filter(option.airline)}
+              disabled={!canApplyFilter}
             />
             <label
               htmlFor={`${type}-${index}`}

@@ -6,4 +6,9 @@
   color: $main-dark;
   text-align: center;
   cursor: pointer;
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }

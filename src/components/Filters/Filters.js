@@ -1,7 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Filter from '../Filter/Filter';
 
-const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
+const Filters = ({
+  flights,
+  filteredFlights,
+  airlines,
+  handleFilterFlights
+}) => {
   const [sortByFilter, setSortByFilter] = useState('ascending');
   const [isDirectFlightFilter, setIsDirectFlightFilter] = useState({
     direct: false,
@@ -12,49 +17,60 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
     highest: ''
   });
   const [airlinesFilter, setAirlinesFilter] = useState([]);
+  const [filterCallbacks, setFilterCallbacks] = useState({
+    isDirect: flight => flight,
+    airlines: flight => flight,
+    price: flight => flight
+  });
+  const [sortCallback, setSortCallback] = useState({
+    ascending: (a, b) => a.price - b.price
+  });
 
   const ascendingFilter = () => {
     setSortByFilter('ascending');
-    const ascendingFlights = flights.slice().sort((a, b) => a.price - b.price);
-    handleFilterFlights(ascendingFlights);
+    setSortCallback({ ascending: (a, b) => a.price - b.price });
   };
 
   const descendingFilter = () => {
     setSortByFilter('descending');
-    const descendingFlights = flights.slice().sort((a, b) => b.price - a.price);
-    handleFilterFlights(descendingFlights);
+    setSortCallback({ descending: (a, b) => b.price - a.price });
   };
 
   const travelTimeFilter = () => {
     setSortByFilter('travelTime');
-    const shortestTravelTimeFlights = flights
-      .slice()
-      .sort((a, b) => a.duration - b.duration);
-    handleFilterFlights(shortestTravelTimeFlights);
+    setSortCallback({ travelTime: (a, b) => a.duration - b.duration });
   };
 
   const setDirectOnlyFlights = () => {
     setIsDirectFlightFilter({ connecting: false, direct: true });
-    const directFlights = flights.slice().filter(flight => flight.isDirect);
-    handleFilterFlights(directFlights);
+    setFilterCallbacks(prevState => ({
+      ...prevState,
+      isDirect: flight => flight.isDirect
+    }));
   };
 
   const setConnectingOnlyFlights = () => {
     setIsDirectFlightFilter({ direct: false, connecting: true });
-    const connectingFlights = flights
-      .slice()
-      .filter(flight => !flight.isDirect);
-    handleFilterFlights(connectingFlights);
+    setFilterCallbacks(prevState => ({
+      ...prevState,
+      isDirect: flight => !flight.isDirect
+    }));
   };
 
   const setAllFlights = () => {
     setIsDirectFlightFilter({ direct: true, connecting: true });
-    handleFilterFlights(flights);
+    setFilterCallbacks(prevState => ({
+      ...prevState,
+      isDirect: flight => flight
+    }));
   };
 
   const resetAllFlights = () => {
     setIsDirectFlightFilter({ direct: false, connecting: false });
-    handleFilterFlights(flights);
+    setFilterCallbacks(prevState => ({
+      ...prevState,
+      isDirect: flight => flight
+    }));
   };
 
   const connectingFilter = () => {
@@ -108,22 +124,27 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
       filtersList.push(airline);
     }
 
-    let filteredFlights = flights.slice();
+    const filterByAirlineCallback = filtersList.length
+      ? flight => filtersList.includes(flight.airlineName)
+      : flight => flight;
 
-    if (filtersList.length) {
-      filteredFlights = filteredFlights.filter(flight =>
-        filtersList.includes(flight.airlineName)
-      );
-    }
-
-    handleFilterFlights(filteredFlights);
+    setFilterCallbacks(prevState => ({
+      ...prevState,
+      airlines: filterByAirlineCallback
+    }));
   };
 
   const filterLowestPrice = useCallback(
     enteredValue => {
-      const newLowestPrice = Number(enteredValue);
+      let newLowestPrice = Number(enteredValue);
+
+      if (!enteredValue || isNaN(newLowestPrice)) {
+        newLowestPrice = 0;
+      }
+
       setPriceFilter(prevState => ({ ...prevState, lowest: newLowestPrice }));
-      const filteredFlights = flights.slice().filter(flight => {
+
+      const filterByLowestPriceCallback = flight => {
         let shouldFlightBeIncluded = false;
 
         if (!priceFilter.highest) {
@@ -136,18 +157,29 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
         }
 
         return shouldFlightBeIncluded;
-      });
+      };
 
-      handleFilterFlights(filteredFlights);
+      setFilterCallbacks(prevState => ({
+        ...prevState,
+        price: filterByLowestPriceCallback
+      }));
     },
-    [flights, handleFilterFlights, priceFilter.highest]
+    [priceFilter.highest]
   );
 
   const filterHighestPrice = useCallback(
     enteredValue => {
-      const newHighestPrice = Number(enteredValue);
+      let newHighestPrice = Number(enteredValue);
+      if (!enteredValue || isNaN(newHighestPrice)) {
+        const highestPriceOfAllFlights = Number(
+          flights.sort((a, b) => b.price - a.price)[0].price
+        );
+        newHighestPrice = highestPriceOfAllFlights;
+      }
+
       setPriceFilter(prevState => ({ ...prevState, highest: newHighestPrice }));
-      const filteredFlights = flights.slice().filter(flight => {
+
+      const filterByHighestPriceCallback = flight => {
         let shouldFlightBeIncluded = false;
 
         if (!priceFilter.lowest) {
@@ -160,12 +192,33 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
         }
 
         return shouldFlightBeIncluded;
-      });
+      };
 
-      handleFilterFlights(filteredFlights);
+      setFilterCallbacks(prevState => ({
+        ...prevState,
+        price: filterByHighestPriceCallback
+      }));
     },
-    [flights, handleFilterFlights, priceFilter.lowest]
+    [flights, priceFilter.lowest]
   );
+
+  useEffect(() => {
+    const filterCallbackFunctions = Object.values(filterCallbacks);
+
+    const filteredFlights = flights.filter(flight => {
+      for (let i = 0; i < filterCallbackFunctions.length; i++) {
+        if (!filterCallbackFunctions[i](flight)) return false;
+      }
+
+      return true;
+    });
+
+    const sortCallbackFunction = Object.values(sortCallback)[0];
+
+    const sortedAndFilteredFlights = filteredFlights.sort(sortCallbackFunction);
+
+    handleFilterFlights(sortedAndFilteredFlights);
+  }, [flights, filterCallbacks, sortCallback, handleFilterFlights]);
 
   const filters = [
     {
@@ -217,14 +270,12 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
         {
           title: 'От',
           type: 'lowest',
-          value: priceFilter.lowest,
-          filter: filterLowestPrice
+          value: priceFilter.lowest
         },
         {
           title: 'До',
           type: 'highest',
-          value: priceFilter.highest,
-          filter: filterHighestPrice
+          value: priceFilter.highest
         }
       ]
     },
@@ -243,6 +294,8 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
     }
   ];
 
+  if (!flights.length) return null;
+
   return (
     <form className='filters'>
       {filters.map((filter, index) => (
@@ -251,6 +304,8 @@ const Filters = ({ flights, shownFlights, airlines, handleFilterFlights }) => {
           type={filter.type}
           title={filter.title}
           options={filter.options}
+          filteredFlights={filteredFlights}
+          isDirectFilterApplied={isDirectFlightFilter.direct}
           hasLargeMarginBottom={index === 0}
           filterHighestPrice={filterHighestPrice}
           filterLowestPrice={filterLowestPrice}
